@@ -1,0 +1,327 @@
+#### This code is for our analysis of single-cell RNA-sequencing data published in the journal Cell Metabolism in 2018 titled, "Deconstructing adipogenesis induced by beta3-adrenergic receptor activation with single-cell expression profiling".
+
+#### Data can be found at the Sequence Read Archive, https://www.ncbi.nlm.nih.gov/sra/, Accession Number: SRP145475. 
+
+#### For this set of experiments, we created single-cell RNA-seq libraries from two mouse adipose tissue depots (epididymal white adipose tissue [eWAT; also denoted gWAT in the code] and inguinal white adipose tissue [iWAT]), with or without a 3 day treatment with the beta3 adrenergic receptor agonist CL 316,243 (CL; treatment type designated by "sham control" or "CL treatmnet"). Cells from these two depots and treatment types were also separated into two cell fractions by magnetic cell separation using Miltenyi Biotec columns and beads. 
+#### (6) single-cell RNA-seq libraries were made from libraries as follows:
+#### (6) C57BL/6j mice ->         sham surgery for control 		-> after (3) days, collect eWAT and iWAT from all animals; pool tissues by type and create a single cell suspension -> fraction cells into immune (Lineage positive) and non-immune (Lineage negative) cell types using magnetic bead cell separation -> create single-cell libraries using the 10X Genomics system from each fraction and tissue type, ending with (3) libraries: eWAT Lineage positive, eWAT Lineage negitive; and iWAT Lineage negative
+#### (6) C57BL/6j mice -> CL micropump implanted subcutaneously -> after (3) days, collect eWAT and iWAT from all animals; pool tissues by type and create a single cell suspension -> fraction cells into immune (Lineage positive) and non-immune (Lineage negative) cell types using magnetic bead cell separation -> create single-cell libraries using the 10X Genomics system from each fraction and tissue type, ending with (3) libraries: eWAT Lineage positive, eWAT Lineage negitive; and iWAT Lineage negative
+#### The (6) single-cell libraries were multiplexed as indicated below and sequenced on the Illumina NextSeq500 usign high output 75-cycle kits with the following read length configuration: 26 bp read1, 14bp I7index, 8bp I5 index and 58 bp read2. 
+
+
+###################################################
+####              Data Download                ####
+###################################################
+
+#### .fastq files are available for download at the Sequence Read Archive, SRA accession number SRP145475
+
+###################################################
+####           Cell Ranger Analysis            ####
+###################################################
+
+module load bcl2fastq #v2.19.1.403
+bcl2fastq --version #to test that the module loaded properly 
+module load cellranger #v2.0.1
+cellranger #to test that the module loaded properly 
+
+#############################
+#### Running cellranger count
+#### cellranger count takes FASTQ files output from the cellranger mkfastq function and performs alignment, filtering, barcode counting, and UMI counting. It uses the Chromium cellular barcodes to generate gene-barcode matrices, determine clusters, and perform gene expression analysis. 
+#### Below are the six FASTQ libraries we needed to align and count.
+#### --id is an arbitrary run ID
+#### --fastqs is the path to the fastq files
+#### --sample is the sample name specified in the sample sheet that was used in the cellranger mkfastq function. 
+
+#### Sample: eWAT, sham control, 3 days, Lineage positive cell fraction
+cellranger count --id=gWAT_sham_3D_Linpos --fastqs=/wsu/home/groups/granneman/data/fastq/HKJGFBGX2 --sample=gWAT_sham_3D_Linpos --transcriptome=/wsu/home/fr/fr73/fr7397/refdata-cellranger-mm10-1.2.0 
+
+#### Sample: eWAT, CL treatment, 3 days, Lineage positive cell fraction
+cellranger count --id=gWAT_CL_3D_Linpos --fastqs=/wsu/home/groups/granneman/data/fastq/HKJGFBGX2 --sample=gWAT_CL_3D_Linpos --transcriptome=/wsu/home/fr/fr73/fr7397/refdata-cellranger-mm10-1.2.0 
+
+#### Sample: eWAT, sham control, 3 days, Lineage negative cell fraction
+cellranger count --id=gWAT_sham_3D_Linneg --fastqs=/wsu/home/groups/granneman/data/fastq/HKJGFBGX2 --sample=gWAT_sham_3D_Linneg --transcriptome=/wsu/home/fr/fr73/fr7397/refdata-cellranger-mm10-1.2.0 
+
+#### Sample: eWAT, CL treatment, 3 days, Lineage negative cell fraction
+cellranger count --id=gWAT_CL_3D_Linneg --fastqs=/wsu/home/groups/granneman/data/fastq/HKKFHBGX2 --sample=gWAT_CL_3D_Linneg --transcriptome=/wsu/home/fr/fr73/fr7397/refdata-cellranger-mm10-1.2.0 
+
+#### Sample: iWAT, sham control, 3 days, Lineage negative cell fraction
+cellranger count --id=iWAT_sham_3D_Linneg --fastqs=/wsu/home/groups/granneman/data/fastq/HKKFHBGX2 --sample=iWAT_sham_3D_Linneg --transcriptome=/wsu/home/fr/fr73/fr7397/refdata-cellranger-mm10-1.2.0 
+
+#### Sample: iWAT, CL treatment, 3 days, Lineage negative cell fraction
+cellranger count --id=iWAT_CL_3D_Linneg --fastqs=/wsu/home/groups/granneman/data/fastq/HKKFHBGX2 --sample=iWAT_CL_3D_Linneg --transcriptome=/wsu/home/fr/fr73/fr7397/refdata-cellranger-mm10-1.2.0 
+
+############################
+#### Running cellranger aggr
+#### cellranger aggr aggregates outputs from multiple runs of the cellranger count function, normalizing those runs tot he same sequencing depth and then recomputing the gene-barcode matrices and analysis on the combined data. 
+#### Below are the five ways we aggregated the data
+#### The .csv file used for each aggregation has two columns: (1) library_id: an arbitrary name for that library that will be used to distinguish it in the Loupe(TM) Cell Browser, and (2) molecule_h5: the path to the molecule_info.h5 file produced by cellranger count -> /outs/molecule_info.h5.
+
+#### .cloupe output files from library aggregation are then opened with the 10X Genomics Loupe(TM) Cell Browser v2.0.0. You can download the Loupe(TM) Cell Browser at: https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/installation
+#### Many of the figures are exported from Loupe(TM)
+
+#### Data presented in Figures 1, 2, S2, S3, S5.
+#### Count files used: gWAT_sham_3D_Linneg, gWAT_CL_3D_Linneg
+cellranger aggr --id=AGG_gWAT_ShamCL_3D_Linneg  --csv=/wsu/home/groups/granneman/data/aggregate_files/gWAT/AGG_gWAT_ShamCL_3D_Linneg.csv
+
+#### Data presented in Figures 3, S4.  
+#### Count files used: gWAT_sham_3D_Linpos, gWAT_CL_3D_Linpos, gWAT_sham_3D_Linneg, gWAT_CL_3D_Linneg
+cellranger aggr --id=AGG_gWAT_ShamCL_3D_LinposLinneg --csv=/wsu/home/groups/granneman/data/aggregate_files/gWAT/AGG_gWAT_ShamCL_3D_LinposLinneg.csv
+
+#### Data presented in Figures 4, S6.
+#### Count files used: gWAT_sham_3D_Linpos, gWAT_CL_3D_Linpos
+cellranger aggr --id=AGG_gWAT_ShamCL_3D_Linpos --csv=/wsu/home/groups/granneman/data/aggregate_files/gWAT/AGG_gWAT_ShamCL_3D_Linpos.csv
+
+#### Data presented in Figure 5. 
+#### Count files used: iWAT_sham_3D_Linneg, iWAT_CL_3D_Linneg
+cellranger aggr --id=AGG_iWAT_ShamCL_3D_Linneg  --csv=/wsu/home/groups/granneman/data/aggregate_files/iWAT/AGG_iWAT_ShamCL_3D_Linneg.csv
+
+#### Data presented in Figure 6.  
+#### Count files used: gWAT_sham_3D_Linneg, iWAT_sham_3D_Linneg
+cellranger aggr --id=AGG_gWATiWAT_Sham_3D_Linneg  --csv=/wsu/home/groups/granneman/data/aggregate_files/gWATiWAT/AGG_gWATiWAT_Sham_3D_Linneg.csv
+
+
+###################################################
+####                Seurat Analysis            ####
+#### Corresponds to Figures 2C, S2, 5B, and 6C ####
+###################################################
+
+#### R Studio, Version 1.1.383
+#### R version 3.4.2
+
+#### For these analyses, I used the designated aggregate file's output (1) folder labaled filtered_gene_bc_matrices_mex/mm10/ and (2) the .csv file that calls the clusters, from /outs/analysis/clustering/kmeans_N_clusters/clusters.csv. Both of these files were transfered into the local ~/Downloads/ directory.
+
+#### The following packages will need to be loaded for all analyses:
+
+library(Seurat) #v2.3.0
+library(dplyr) #0.7.4
+library(Matrix) #v1.2-13
+setwd("~/Downloads/")
+
+#### More information about the single-cell R toolkit, Seurat, can be found at http://satijalab.org/seurat/.
+
+#########################################################################################################
+#### Figure 2. scRNA-seq of mouse eWAT maps an adipogenic differentiation trajectory during CL treatment.
+#### Below script corresponds to Figure 2C. 
+#### Data is the aggregate of eWAT Lineage negative cells from control and CL-treated mice. 
+#### Need to edit the .csv file that indicates what clusters the cells are in. Opened /kmeans_10_clusters/cluster.csv. Deleted the first column which indicates the cell identity. Saved as gWATclusters_K10_numbersonly.csv. 
+
+gWAT.data <- Read10X("~/Downloads/gWAT_RPR/AGG_gWAT_ShamCL_3D_Linneg/outs/filtered_gene_bc_matrices_mex/mm10/")
+LK10 <- read.csv(file = "~/Downloads/gWATclusters_K10_numbersonly.csv", header = TRUE) #kmeans_10_clusters
+gWAT <- CreateSeuratObject(raw.data = gWAT.data, min.cells = 0, min.genes = 0, project = "AGG_gWAT_shamCL_Linneg")
+#### Add the cluster identities from Loupe to meta.data 
+MetaData = gWAT@meta.data
+head(MetaData)
+Clusters <- LK10
+MetaData["Loupe_Clusters"] <- Clusters
+head(MetaData)
+MetaDataTrim <- subset(MetaData, select = c("Loupe_Clusters"))
+head(MetaDataTrim)
+gWAT <- AddMetaData(gWAT, MetaDataTrim)
+head(gWAT@meta.data)
+str(gWAT)
+#### Subset the data to only include clusters 5 and 6, which correspond to clusters Diff. ASC and Pro. ASC from Figure 1A. 
+gWAT <- SubsetData(object = gWAT, subset.name = "Loupe_Clusters", accept.low = 4, accept.high = 7)
+#### Calculate the percenage of mitochondrial genes and store it in percent.mito in meta.data.
+mito.genes <- grep(pattern = "^mt-", x = rownames(x = gWAT@data), value = TRUE)
+percent.mito <- Matrix::colSums(gWAT@raw.data[mito.genes, ])/Matrix::colSums(gWAT@raw.data)
+gWAT <- AddMetaData(object = gWAT, metadata = percent.mito, col.name = "percent.mito")
+head(gWAT@meta.data, 1)
+#### Visualize and filter out cells. 
+VlnPlot(object = gWAT, features.plot = c("nGene", "nUMI", "percent.mito"), nCol = 3)
+gWAT <- FilterCells(object = gWAT, subset.names = c("nUMI"), low.thresholds = c(-Inf), high.thresholds = c(60000))
+VlnPlot(object = gWAT, features.plot = c("nGene", "nUMI", "percent.mito"), nCol = 3)
+#### Log normalize data
+gWAT <- NormalizeData(object = gWAT, normalization.method = "LogNormalize", 
+                      scale.factor = 10000)
+#### Find variable genes.
+gWAT <- FindVariableGenes(object = gWAT, mean.function = ExpMean, dispersion.function = LogVMR, 
+                          x.low.cutoff = 0.0125, x.high.cutoff = 3, y.cutoff = 0.5)
+length(x = gWAT@var.genes) #### returned 2,923 variable genes
+#### Scale data and remove unwanted sources of variation
+gWAT <- ScaleData(object = gWAT, vars.to.regress = c("nUMI", "percent.mito"))
+#### Perform linear dimesional reduction
+gWAT <- RunPCA(object = gWAT, pc.genes = gWAT@var.genes, do.print = TRUE, pcs.print = 1:5, 
+               genes.print = 5)
+gWAT <- ProjectPCA(object = gWAT, do.print = FALSE)
+#### Cluster the cells
+gWAT <- FindClusters(object = gWAT, reduction.type = "pca", dims.use = 1:2, resolution = 0.15, print.output = 0, save.SNN = TRUE, force.recalc = TRUE)
+#### Run Non-linear dimensional reduction (tSNE)
+gWAT <- RunTSNE(object = gWAT, dims.use = 1:2, do.fast = TRUE)
+TSNEPlot(object = gWAT)
+#### Change identities to Prolif., Early Diff., and Diff. 
+current.cluster.ids <- c(0, 1, 2, 3)
+new.cluster.ids <- c("Diff.", "Early Diff.", "Prolif.", "Other")
+gWAT@ident <- plyr::mapvalues(x = gWAT@ident, from = current.cluster.ids, to = new.cluster.ids)
+TSNEPlot(object = gWAT, pt.size = 0.5, label.size = 5)
+#### Violin plots of adipogenic genes in each clutser. 
+VlnPlot(object = gWAT, features.plot = c("Pdgfra"), point.size.use = NA, ident.include = c("Diff.", "Early Diff.", "Prolif."))
+VlnPlot(object = gWAT, features.plot = c("Cdca8"), point.size.use = NA, ident.include = c("Diff.", "Early Diff.", "Prolif."))
+VlnPlot(object = gWAT, features.plot = c("Cebpa"), point.size.use = NA, ident.include = c("Diff.", "Early Diff.", "Prolif."))
+VlnPlot(object = gWAT, features.plot = c("Plin1"), point.size.use = NA, ident.include = c("Diff.", "Early Diff.", "Prolif."))
+VlnPlot(object = gWAT, features.plot = c("Adig"), point.size.use = NA, ident.include = c("Diff.", "Early Diff.", "Prolif."))
+VlnPlot(object = gWAT, features.plot = c("Scd1"), point.size.use = NA, ident.include = c("Diff.", "Early Diff.", "Prolif."))
+#### Find differentially expressed genes (cluster markers)
+gWAT.markers <- FindAllMarkers(object = gWAT, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
+gWAT.markers %>% group_by(cluster) %>% top_n(2, avg_logFC)
+top10 <- gWAT.markers %>% group_by(cluster) %>% top_n(10, avg_logFC)
+DoHeatmap(object = gWAT, genes.use = top10$gene, slim.col.label = TRUE, remove.key = TRUE)
+#### Find all markers for each individual cluster.
+cluster0.markers <- FindMarkers(object = gWAT, ident.1 = 0, min.pct = 0.25)
+cluster1.markers <- FindMarkers(object = gWAT, ident.1 = 1, min.pct = 0.25)
+cluster2.markers <- FindMarkers(object = gWAT, ident.1 = 2, min.pct = 0.25)
+cluster3.markers <- FindMarkers(object = gWAT, ident.1 = 3, min.pct = 0.25)
+#### Export cluster markers and .csv files. 
+write.csv(cluster0.markers, "cluster0markers.csv")
+write.csv(cluster1.markers, "cluster1markers.csv")
+write.csv(cluster2.markers, "cluster2markers.csv")
+write.csv(cluster3.markers, "cluster3markers.csv")
+
+
+###########################################################################
+#### Figure S2. Pseudotime analysis of proliferating/differentiating cells.
+#### Below script corresponds to Figure S2. 
+#### This analysis directly flows from the above analysis in Seurat for Figure 2C. Need to complete the above analysis before Figure S2. 
+
+#### Examine PCs
+PCAPlot(object = gWAT, dim.1 = 1, dim.2 = 2)
+#### PC1 orders cells along the differentiation trajectory. Moving forward, use -PC1 as a surrogate for pseudotime. 
+pc1 <- rank(-gWAT@dr$pca@cell.embeddings[,1]) #### using the negative of PC1 to orient the graph by trajectory (ie., Prolif. -> Early Diff. -> Diff.)
+pc2 <- gWAT@dr$pca@cell.embeddings[,2]
+ind <- pc2 > -15 #### subset cells used in this analysis to exclude the "Other" cluster by only using cells with a value of PC2 > -15
+sel <- c("Pdgfra","Cdca8","Cebpa","Plin1","Adig") #### set the genes you want to graph
+smat <- sapply(sel,function(s){
+  sp <- smooth.spline(pc1[ind],gWAT@scale.data[s,ind])
+  sp$y
+})
+df <- data.frame(pseudo_time=1:nrow(smat),smat)
+library(reshape2)
+ldf <- melt(df, id.vars="pseudo_time")
+ggplot(ldf,aes(x=pseudo_time,y=value,col=variable)) + geom_line() #### final plot as in Figure S2A
+
+#### Below is the code to generate the genes correlated with pseudotime in Table S4. 
+
+x <- gWAT@scale.data[,ind]
+i <- 1
+cmat <- sapply(1:nrow(x),function(i){
+  ct <- cor.test(pc1[ind],x[i,])
+  c(ct$estimate,ct$p.value)
+})
+cdf <- data.frame(t(cmat))
+rownames(cdf) <- rownames(x) #### set row names
+colnames(cdf) <- c("r","p") #### set column names
+cdf <- cdf[!is.na(cdf$p),] #### remove NAs
+cdf$p.adj <- p.adjust(cdf$p) #### add a column of the adjusted p values
+hist(cdf$p) #### histogram of the distribution of p values
+hist(cdf$p.adj) #### histogram of the distribution of adjusted p values
+cdf$r2 <- cdf$r^2 #### add a column of r^2 values
+cdf <- cdf[order(-cdf$r2),] #### put the genes in order by r^2 value
+head(cdf)
+write.csv(cdf,file="trajectory_correlations050318.csv",quote=F) #### export .csv of the genes
+
+#### Figure 2SB, graphing the top 5 genes positively correlated with psueotime
+
+sel <- c("Fabp4","Adipoq","Acsl1","Prkar2b","Plin1") #### set the genes you want to graph
+smat <- sapply(sel,function(s){
+  sp <- smooth.spline(pc1[ind],gWAT@scale.data[s,ind])
+  sp$y
+})
+df <- data.frame(pseudo_time=1:nrow(smat),smat)
+library(reshape2)
+ldf <- melt(df, id.vars="pseudo_time")
+ggplot(ldf,aes(x=pseudo_time,y=value,col=variable)) + geom_line() #### final plot as in Figure S2A
+
+
+#### Figure 2SB, graphing the top 5 genes negatively correlated with psueotime
+
+sel <- c("S100a6","Ifitm3","Wbp5","Col1a2","Timp2") #### set the genes you want to graph
+smat <- sapply(sel,function(s){
+  sp <- smooth.spline(pc1[ind],gWAT@scale.data[s,ind])
+  sp$y
+})
+df <- data.frame(pseudo_time=1:nrow(smat),smat)
+library(reshape2)
+ldf <- melt(df, id.vars="pseudo_time")
+ggplot(ldf,aes(x=pseudo_time,y=value,col=variable)) + geom_line() #### final plot as in Figure S2A
+
+
+#########################################################################
+#### Figure 5. scRNA-seq of ASC from iWAT of control and CL treated mice. 
+#### Below script corresponds to Figure 5B. 
+#### Data is the aggregate of iWAT Lineage negative cells from control and CL-treated mice. 
+#### Need to edit the .csv file that indicates what clusters the cells are in. Opened /kmeans_9_clusters/cluster.csv. Deleted the first column which indicates the cell identity. Changed identities as follows: Loupe 1 -> ASC 2, Loupe 2 -> ASC 1, Loupe 3 -> Cluster 3, Loupe 4 -> Cluster 4, Loupe 5 -> Cluster 5, Loupe 6 -> Cluster 6, Loupe 7 -> Cluster 7, Loupe 8 -> Cluster 8, Loupe 9 -> Cluster 9, Loupe 10 -> Cluster 10. Save as iWAT_clusters.csv.
+
+
+iWAT.data <- Read10X("~/Downloads/AGG_iWAT_ShamCL_3D_Linneg_filtered_gene_bc_matrices_mex/mm10/")
+CK10 <- read.csv(file = "~/Downloads/iWAT_clusters.csv", header = TRUE) #kmeans_10_clusters
+iWAT <- CreateSeuratObject(raw.data=iWAT.data, min.cells = 0, min.genes = 0, project = "AGG_iWAT_ShamCL_3D_Linneg")
+#### Add the cluster identities from Loupe to meta.data 
+MetaData = iWAT@meta.data
+head(MetaData)
+Clusters <- CK10
+MetaData["Loupe_Clusters"] <- Clusters
+head(MetaData)
+MetaDataTrim <- subset(MetaData, select = c("Loupe_Clusters"))
+head(MetaDataTrim)
+iWAT <- AddMetaData(iWAT, MetaDataTrim)
+head(iWAT@meta.data)
+#### Calculate the percenage of mitochondrial genes and store it in percent.mito in meta.data.
+mito.genes <- grep(pattern = "^mt-", x = rownames(x = iWAT@data), value = TRUE)
+percent.mito <- Matrix::colSums(iWAT@raw.data[mito.genes, ])/Matrix::colSums(iWAT@raw.data)
+iWAT <- AddMetaData(object = iWAT, metadata = percent.mito, col.name = "percent.mito")
+#### Visualize and filter out cells. 
+VlnPlot(object = iWAT, features.plot = c("nGene", "nUMI", "percent.mito"), nCol = 3)
+iWAT <- FilterCells(object = iWAT, subset.names = c("nGene"), low.thresholds = c(500), high.thresholds = c(4000))
+iWAT <- FilterCells(object = iWAT, subset.names = c("nUMI"), low.thresholds = c(-Inf), high.thresholds = c(15000))
+iWAT <- FilterCells(object = iWAT, subset.names = c("percent.mito"), low.thresholds = c(-Inf), high.thresholds = c(0.2))
+VlnPlot(object = iWAT, features.plot = c("nGene", "nUMI", "percent.mito"), nCol = 3)
+#### Change identities of cells to Loupe Cluster identities 
+iWAT <- SetAllIdent(object = iWAT, id = "Loupe_Clusters")
+head(iWAT@ident)
+#### Log normalize data
+iWAT <- NormalizeData(object = iWAT, normalization.method = "LogNormalize", 
+                       scale.factor = 10000)
+#### Create violin plots from Figure 5B
+VlnPlot(object = iWAT, features.plot = c("Pi16", "Dpp4"), ident.include = c("ASC 1", "ASC 2"), point.size.use = NA, cols.use = c("dodgerblue3", "chocolate1"))
+VlnPlot(object = iWAT, features.plot = c("Icam1", "Col4a2"), ident.include = c("ASC 1", "ASC 2"), point.size.use = NA, cols.use = c("dodgerblue3", "chocolate1"))
+VlnPlot(object = iWAT, features.plot = c("Cav1", "G0s2"), ident.include = c("ASC 1", "ASC 2"), point.size.use = NA, cols.use = c("dodgerblue3", "chocolate1"))
+
+
+#####################################################
+#### Figure 6. Comparison of ASCs from eWAT and iWAT. 
+#### Below script corresponds to Figure 6C. 
+#### Data is the aggregate of eWAT and iWAT Lineage negative cells from control mice. 
+#### Need to edit the .csv file that indicates what clusters the cells are in. Opened /kmeans_9_clusters/cluster.csv. Deleted the first column which indicates the cell identity. Changed identities as follows: Loupe 1 -> ASC 2, Loupe 2 -> ASC 1, Loupe 3 -> Cluster 3, Loupe 4 -> Cluster 4, Loupe 5 -> Cluster 5, Loupe 6 -> Cluster 6, Loupe 7 -> Cluster 7, Loupe 8 -> Cluster 8, Loupe 9 -> Cluster 9. Save as gWATiWAT_K9_clusters_FINAL.csv. 
+
+giWAT.data <- Read10X("~/Downloads/AGG_gWATiWAT_Sham_3D_Linneg_filtered_gene_bc_matrices_mex/mm10/")
+CK9 <- read.csv(file = "~/Downloads/gWATiWAT_K9_clusters_FINAL.csv", header = TRUE) #kmeans_9_clusters
+giWAT <- CreateSeuratObject(raw.data=giWAT.data, min.cells = 0, min.genes = 0, project = "giWAT_AGGsham")
+#### Add the cluster identities from Loupe to meta.data 
+MetaData = giWAT@meta.data
+head(MetaData)
+Clusters <- CK9
+MetaData["Loupe_Clusters"] <- Clusters
+head(MetaData)
+MetaDataTrim <- subset(MetaData, select = c("Loupe_Clusters"))
+head(MetaDataTrim)
+giWAT <- AddMetaData(giWAT, MetaDataTrim)
+head(giWAT@meta.data)
+#### Calculate the percenage of mitochondrial genes and store it in percent.mito in meta.data.
+mito.genes <- grep(pattern = "^mt-", x = rownames(x = giWAT@data), value = TRUE)
+percent.mito <- Matrix::colSums(giWAT@raw.data[mito.genes, ])/Matrix::colSums(giWAT@raw.data)
+giWAT <- AddMetaData(object = giWAT, metadata = percent.mito, col.name = "percent.mito")
+#### Visualize and filter out cells. 
+VlnPlot(object = giWAT, features.plot = c("nGene", "nUMI", "percent.mito"), nCol = 3)
+giWAT <- FilterCells(object = giWAT, subset.names = c("nGene"), low.thresholds = c(500), high.thresholds = c(Inf))
+giWAT <- FilterCells(object = giWAT, subset.names = c("nUMI"), low.thresholds = c(-Inf), high.thresholds = c(2500))
+giWAT <- FilterCells(object = giWAT, subset.names = c("percent.mito"), low.thresholds = c(-Inf), high.thresholds = c(0.1))
+VlnPlot(object = giWAT, features.plot = c("nGene", "nUMI", "percent.mito"), nCol = 3)
+#### Change identities of cells to Loupe Cluster identities
+giWAT <- SetAllIdent(object = giWAT, id = "Loupe_Clusters")
+head(giWAT@ident)
+#### Log normalize data
+giWAT <- NormalizeData(object = giWAT, normalization.method = "LogNormalize", 
+                       scale.factor = 10000)
+#### Create violin plots from Figure 6C
+VlnPlot(object = giWAT, features.plot = c("Col4a1", "Bgn", "Penk"), ident.include = c("ASC 1", "ASC 2"), point.size.use = NA, use.raw = TRUE, y.log = TRUE, cols.use = c("dodgerblue3", "chocolate1"))
+VlnPlot(object = giWAT, features.plot = c("Sbsn", "Il1r2", "Fndc1"), ident.include = c("ASC 1", "ASC 2"), point.size.use = NA, use.raw = TRUE, y.log = TRUE, cols.use = c("dodgerblue3", "chocolate1"))
+VlnPlot(object = giWAT, features.plot = c("Dpep1", "Mmp2", "Serpinf1"), ident.include = c("ASC 1", "ASC 2"), point.size.use = NA, use.raw = TRUE, y.log = TRUE, cols.use = c("dodgerblue3", "chocolate1"))
